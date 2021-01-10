@@ -119,7 +119,9 @@ app.get("/projects", (req, res) => {
         var reply = [];
         for(var i = 0; i < result.length; i++){
             var project = result[i];
-            reply.push({name: project.name, description: project.description, person: JSON.parse(project.person), status: project.status, date: project.date});
+            console.log(project.person);
+            console.log(JSON.parse(project.person));
+            reply.push({name: project.name, description: project.description, person: JSON.parse(project.person), status: project.status, date: project.date, id: project.id});
         }
         res.json(reply);
     });
@@ -136,17 +138,14 @@ app.post("/addProject", (req, res) => {
     else if (date == undefined){errorSqlJson(res, "Date is missing");nothingNull = false;}
     else if (status == undefined){errorSqlJson(res, "Status is missing");nothingNull = false;}
     if(!nothingNull) return;
+    console.log([person]);
+    console.log(JSON.parse(person));
     connection.query("INSERT INTO projects(name, description, person, status, date) VALUES(?, ?, ?, ?, ?)", datas, (err, result) => {
         if(err) errorSqlJson(res, err);
         res.json({
             success: true,
         });
     })
-});
-
-app.get("/addProject", (req, res) => {
-    console.log("start request add project get");
-    res.send("get add project")
 });
 
 app.get("/json", (req, res) => {
@@ -169,6 +168,12 @@ app.post("/addJson", (req, res) => {
         res.json({
             success: true,
         })
+    });
+});
+
+app.post("/testPost", (req, res) => {
+    res.json({
+        success: true,
     });
 });
 
