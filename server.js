@@ -130,22 +130,45 @@ app.get("/projects", (req, res) => {
 app.post("/addProject", (req, res) => {
     console.log("start request add project post");
     var body = req.body;
-    var name = body.name, status = body.status, person = body.person, date = body.date, description = body.description;
-    var datas = [name, description, JSON.stringify(person), status, date];
+    var name = body.name, status = body.status, personBody = body.person, date = body.date, description = body.description;
+    var person = [];
+    console.log(personBody instanceof Array);
+    console.log(JSON.parse(personBody)[0]);
+    for(var i = 0; i < JSON.parse(personBody).length; i++){
+        person.push(JSON.parse(personBody)[i]);
+    }
+    console.log(person);
+    var datas = [name, description, person, status, date];
+    console.log(datas);
     var nothingNull = true;
     if(name == undefined){errorSqlJson(res, "Name is missing");nothingNull = false;}
     else if (person == undefined){errorSqlJson(res, "Person are missing");nothingNull = false;}
     else if (date == undefined){errorSqlJson(res, "Date is missing");nothingNull = false;}
     else if (status == undefined){errorSqlJson(res, "Status is missing");nothingNull = false;}
     if(!nothingNull) return;
-    console.log([person]);
-    console.log(JSON.parse(person));
-    connection.query("INSERT INTO projects(name, description, person, status, date) VALUES(?, ?, ?, ?, ?)", datas, (err, result) => {
-        if(err) errorSqlJson(res, err);
+    connection.query("INSERT INTO projects(name, description, person, status, date) VALUES(?, ?, ?, ?, ?)", JSON.stringify(datas), (err, result) => {
+        if(err) {errorSqlJson(res, err);console.log(err.message);return}
         res.json({
             success: true,
         });
     })
+});
+
+app.post("/addJson", (req, res) => {
+
+    let jsonData = req.body;
+    let values = [];
+
+    for(var i = 0; i < jsonData.length; i++){
+        values.push(jsonData[i]);
+    }
+    console.log(values);
+    dbJson.query("INSERT INTO json(name) VALUES (?)", JSON.stringify(values), (err, result) => {
+        if(err){ errorSqlJson(res, err); return}
+        res.json({
+            success: true,
+        })
+    });
 });
 
 app.get("/json", (req, res) => {
@@ -159,15 +182,6 @@ app.get("/json", (req, res) => {
             reply.push(data);
         }
         res.json(reply);
-    });
-});
-
-app.post("/addJson", (req, res) => {
-    dbJson.query("INSERT INTO json(name) VALUES (?)", [JSON.stringify(['Paul', 'Thomas', 'Laura'])], (err, result) => {
-        if(err) errorSqlJson(res, err);
-        res.json({
-            success: true,
-        })
     });
 });
 
